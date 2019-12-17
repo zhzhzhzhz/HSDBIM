@@ -1,0 +1,87 @@
+<html>
+<head>
+    <link rel="stylesheet" href="http://cache.amap.com/lbs/static/main1119.css"/>
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.2&key=ae79c7ea0779ca2c8c06ac8424ef5d23&plugin=AMap.Autocomplete,AMap.PlaceSearch"></script>
+    <script type="text/javascript" src="http://cache.amap.com/lbs/static/addToolbar.js"></script>
+    <style>
+        body,html,#initMap{
+            width: 100%;
+            height: 100%;
+            font-size: 12px;
+            font-family: "微软雅黑";
+        }
+    </style>
+</head>
+<body>
+<div id="initMap"></div>
+<div id="myPageTop">
+    <table>
+        <tr>
+            <td>
+                <label>请输入关键字：</label>
+            </td>
+            <td>
+                <label>经度：</label>
+            </td>
+            <td>
+                <label>纬度：</label>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input id="tipinput"/>
+            </td>
+            <td>
+                <input type="text" readonly="true" id="lat" />
+            </td>
+            <td>
+                <input type="text" readonly="true" id="lon" />
+            </td>
+        </tr>
+    </table>
+</div>
+<script>
+    //地图加载
+    var map = new AMap.Map("initMap",{
+        center: [116.481181, 39.989792],
+        resizeEnable: true,
+        zoom: 10
+    });
+    //输入提示
+    var autoOptions = {
+        input: "tipinput"
+    };
+    var auto = new AMap.Autocomplete(autoOptions);
+    var placeSearch = new AMap.PlaceSearch({
+        map: map
+    });  //构造地点查询类
+    AMap.event.addListener(auto, "select", select);//注册监听，当选中某条记录时会触发
+    function select(e) {
+        placeSearch.setCity(e.poi.adcode);
+        placeSearch.search(e.poi.name);  //关键字查询查询
+    }
+    var marker;
+    // 实例化点标记
+    function addMarker(lng,lat) {
+        marker = new AMap.Marker({
+            icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+            position: [lng, lat]
+        });
+        marker.setMap(map);
+    }
+    map.on('click', function(e) {
+        // 移除已创建的 marker
+        if (marker!=undefined && marker) {
+            marker.setMap(null);
+            marker = null;
+        }
+        //经度
+        vm.fi = e.lnglat.getLng();
+        //纬度
+        document.getElementById("lon").value = e.lnglat.getLat();
+        // 创建一个 Marker 实例：
+        addMarker(e.lnglat.getLng(), e.lnglat.getLat());
+    });
+</script>
+</body>
+</html>

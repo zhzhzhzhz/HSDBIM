@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 系统用户
@@ -106,9 +107,9 @@ public class SysUserController extends AbstractController {
 	@RequiresPermissions("sys:user:save")
 	public R save(@RequestBody SysUserEntity user){
 		ValidatorUtils.validateEntity(user, AddGroup.class);
-		
+		String str = UUID.randomUUID()+"";
+		user.setSecretKey(str);
 		sysUserService.saveUser(user);
-		
 		return R.ok();
 	}
 	

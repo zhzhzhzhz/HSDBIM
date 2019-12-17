@@ -85,9 +85,21 @@ public class ShiroConfig {
         filterMap.put("/statics/**", "anon");
         filterMap.put("/login.html", "anon");
         filterMap.put("/sys/login", "anon");
+        filterMap.put("/sys/hsdBimDescription/list", "anon");
+        //filterMap.put("/sys/hotSearch/queryHotSearch", "anon");
+        filterMap.put("/sys/hsdpoi/list", "anon");
+        ///filterMap.put("/sys/hsdCover/queryAll", "anon");
+        //filterMap.put("/sys/hsdCover/deleteMessage", "anon");
+        ///filterMap.put("/sys/hsdCover/deleteAll", "anon");
+        ///filterMap.put("/sys/hsdCover/saveMessage", "anon");
+        ///filterMap.put("/sys/hsdCover/updateMessage", "anon");
+        //filterMap.put("/sys/hsdCover/findById", "anon");
+        filterMap.put("/sys/hsdCover/queryMenu", "anon");
+        ///filterMap.put("/sys/hsdpoi/findAll", "anon");
         filterMap.put("/favicon.ico", "anon");
         filterMap.put("/captcha.jpg", "anon");
         filterMap.put("/**", "authc");
+
         shiroFilter.setFilterChainDefinitionMap(filterMap);
 
         return shiroFilter;

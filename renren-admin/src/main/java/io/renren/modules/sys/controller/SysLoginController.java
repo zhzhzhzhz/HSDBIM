@@ -12,13 +12,17 @@ package io.renren.modules.sys.controller;
 import com.google.code.kaptcha.Constants;
 import com.google.code.kaptcha.Producer;
 import io.renren.common.utils.R;
+import io.renren.modules.sys.entity.HsdLoginRecord;
+import io.renren.modules.sys.service.SysLoginService;
 import io.renren.modules.sys.shiro.ShiroUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.subject.Subject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.imageio.ImageIO;
@@ -26,16 +30,22 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 登录相关
  *
  * @author Mark sunlightcs@gmail.com
  */
+@Slf4j
 @Controller
 public class SysLoginController {
 	@Autowired
 	private Producer producer;
+
+	@Autowired
+	private SysLoginService loginService;
 	
 	@RequestMapping("captcha.jpg")
 	public void captcha(HttpServletResponse response)throws IOException {
@@ -68,6 +78,10 @@ public class SysLoginController {
 			Subject subject = ShiroUtils.getSubject();
 			UsernamePasswordToken token = new UsernamePasswordToken(username, password);
 			subject.login(token);
+			String name = token.getUsername();
+			HsdLoginRecord hsdLoginRecord = new HsdLoginRecord();
+			hsdLoginRecord.setUsername(name);
+			loginService.save(hsdLoginRecord);
 		}catch (UnknownAccountException e) {
 			return R.error(e.getMessage());
 		}catch (IncorrectCredentialsException e) {
@@ -88,6 +102,25 @@ public class SysLoginController {
 	public String logout() {
 		ShiroUtils.logout();
 		return "redirect:login.html";
+	}
+
+	/**
+	 * 活跃用户量
+	 */
+	@RequestMapping("/sys/loginRecord/queryPeopleNum")
+	@ResponseBody
+	public R query(@RequestParam("startTime") Date startTime,@RequestParam("endTime") Date endTime){
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		String start = sdf.format(startTime);
+		String end = sdf.format(endTime);
+		int num = 0;
+		try{
+			num = loginService.queryPeopleNum(start, end);
+		}catch (Exception e){
+			e.printStackTrace();
+			log.error("操作失败"+e);
+		}
+		return R.ok().put("num",num);
 	}
 	
 }
