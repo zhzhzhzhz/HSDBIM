@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.renren.modules.sys.dao.SysLoginDao">
+    <resultMap id="BaseResultMap" type="io.renren.modules.sys.entity.HsdLoginRecord">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="queryPeopleNum" resultType="int">
+        select count(distinct username) from hsd_login_record
+        <where>
+            <if test="start != null and start != '' and end != null and end != ''">
+                create_time between #{start} and #{end}
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

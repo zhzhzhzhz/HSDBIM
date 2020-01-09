@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.renren.modules.sys.dao.ToLoginDao">
+    <select id="userMesssage" resultType="io.renren.modules.sys.dto.LoginDTO">
+       select u.user_id as userId,
+              u.username as username,
+              u.password as password,
+              u.email as email,
+			  u.mobile as mobile,
+			  u.salt as salt,
+			  d.name as name
+       from sys_user u left join sys_dept d on u.dept_id=d.dept_id
+       where u.username=#{username,jdbcType=VARCHAR}
+    </select>
+
+
+</mapper>

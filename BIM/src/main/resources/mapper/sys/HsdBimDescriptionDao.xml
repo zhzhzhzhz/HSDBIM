@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.renren.modules.sys.dao.HsdBimDescriptionDao">
+     <resultMap id="BaseResultMap" type="io.renren.modules.sys.entity.HsdBimDescription">
+         <id column="id" jdbcType="BIGINT" property="id"></id>
+         <result column="bid" jdbcType="VARCHAR" property="bid"/>
+         <result column="name" jdbcType="VARCHAR" property="name"/>
+         <result column="title" jdbcType="VARCHAR" property="title"/>
+         <result column="floor" jdbcType="VARCHAR" property="floor"/>
+         <result column="bname" jdbcType="VARCHAR" property="bname"/>
+         <result column="description" jdbcType="VARCHAR" property="description"/>
+         <result column="type" jdbcType="VARCHAR" property="type"/>
+     </resultMap>
+    <sql id="Base_Column_List">
+        id,bid,name,title,floor,bname,description,type
+    </sql>
+     <insert id="saveMessage">
+         insert into hsd_bim_description (id,name,title,floor,bname,description)
+         values (#{id,jdbcType=BIGINT},#{name,jdbcType=VARCHAR},#{title,jdbcType=VARCHAR},
+         #{floor,jdbcType=VARCHAR},#{bname,jdbcType=VARCHAR},#{description,jdbcType=VARCHAR})
+     </insert>
+
+     <select id="findById" resultMap="BaseResultMap">
+         select
+         <include refid="Base_Column_List" />
+         from hsd_bim_description where bid = #{bid,jdbcType=VARCHAR}
+     </select>
+
+    <select id="findType" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from hsd_bim_description where type = #{type,jdbcType=VARCHAR}
+    </select>
+    <select id="findFloorMessage" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from hsd_bim_description where bname = #{bname,jdbcType=VARCHAR} and type = "1"
+    </select>
+    <select id="findFloor" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from hsd_bim_description where bname = #{bname,jdbcType=VARCHAR} and type = "2"
+    </select>
+    <select id="findHome" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from hsd_bim_description where bname = #{bname,jdbcType=VARCHAR} and type = "3"
+    </select>
+</mapper>

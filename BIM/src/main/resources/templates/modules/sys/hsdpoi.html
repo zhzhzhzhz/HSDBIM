@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>华师大POI</title>
+    <#include "/header.html">
+    <!-- 引入样式文件 -->
+    <!--<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.2/lib/index.css">-->
+    <link rel="stylesheet" href="${request.contextPath}/statics/css/vantIndex.css"/>
+    <!-- import Vue.js -->
+    <!--<script src="//vuejs.org/js/vue.min.js"></script>-->
+    <script src="${request.contextPath}/statics/libs/vue2.min.js"></script>
+    <!-- import stylesheet -->
+    <!--<link rel="stylesheet" href="//unpkg.com/view-design/dist/styles/iview.css">-->
+    <link rel="stylesheet" href="${request.contextPath}/statics/styles/iview.css"/>
+    <!-- import iView -->
+    <!--<script src="//unpkg.com/view-design/dist/iview.min.js"></script>-->
+    <script src="${request.contextPath}/statics/js/view-design.dist.iview.min.js"></script>
+    <!-- 引入 Vue 和 Vant 的 JS 文件 -->
+    <!--<script src="https://cdn.jsdelivr.net/npm/vant@2.2/lib/vant.min.js"></script>-->
+    <script src="${request.contextPath}/statics/js/jsdelivr.vant@2.2vant.min.js"></script>
+    <script type="text/javascript" src="http://webapi.amap.com/maps?v=1.4.2&key=ae79c7ea0779ca2c8c06ac8424ef5d23"></script>
+
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2">
+                <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="名称">
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+            <#if shiro.hasPermission("sys:hsdpoi:save")>
+                <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+            </#if>
+            <#if shiro.hasPermission("sys:hsdpoi:update")>
+                <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+            </#if>
+            <#if shiro.hasPermission("sys:hsdpoi:delete")>
+                <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+            </#if>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+    <!--地图-->
+    <div v-show="!showList" style="position: absolute; top: 70px; right: 20px; height: 550px; width: 700px; border-radius: 5px" id="container">
+
+    </div>
+
+    <div v-show="!showList" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <form class="form-horizontal" action="/renren-admin/sys/hsdpoi/upload">
+            <div class="form-group">
+                <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;名称</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.name" placeholder="名称"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;经度</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="lng" placeholder="经度(从右边地图点击获取)" disabled="disabled"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;纬度</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="lat" placeholder="纬度" disabled="disabled"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">电话</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.tel" placeholder="电话"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">地址</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.address" placeholder="地址"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;所属图层</div>
+                <div class="col-sm-10">
+                    <i-select v-model="value1"  style="width:183px" @on-change="clickHsdCover()">
+                        <i-option v-for="item in options" :value="item.value" :key="item.value" >
+                            {{ item.label }}
+                        </i-option>
+                    </i-select>
+                    <i-select v-model="value2"  style="width:183px">
+                        <i-option v-for="item in typeList" :value="item.id" :key="item.id">{{ item.typeName }}</i-option>
+                    </i-select>
+                </div>
+            </div>
+
+           <!-- <div class="form-group">
+                <div class="col-sm-2 control-label">类型</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.type" placeholder="类型"/>
+                </div>
+            </div>-->
+            <div class="form-group">
+                <div class="col-sm-2 control-label">部门</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.depart" placeholder="部门"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">简介</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.jianjie" placeholder="简介"/>
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label">历史</div>
+                <div class="col-sm-10">
+                    <input type="text" class="form-control" v-model="hsdPoi.history" placeholder="历史"/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-2 control-label">图片上传</div>
+                <div class="col-sm-10">
+                    <van-uploader  v-model="fileList" :before-delete="deletePic" :preview-full-image="false"  :accept="'image/*'"  multiple="true" />
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-2 control-label"></div>
+                <input type="button" class="btn btn-primary" id="btnSaveOrUpdate" data-loading-text="保存中..." @click="saveOrUpdate" value="确定"/>
+                &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="${request.contextPath}/statics/js/modules/sys/hsdpoi.js?_${.now?long}">
+
+
+</script>
+
+<script>
+    //地图加载
+    var map = new AMap.Map("container",{
+        center: [121.47584, 31.23399],
+        resizeEnable: true,
+        zoom: 14
+    });
+
+    var marker;
+    // 实例化点标记
+    function addMarker(lng,lat) {
+        marker = new AMap.Marker({
+            icon: "https://webapi.amap.com/theme/v1.3/markers/n/mark_r.png",
+            position: [lng, lat]
+        });
+        marker.setMap(map);
+    }
+    map.on('click', function(e) {
+        // 移除已创建的 marker
+        if (marker!=undefined && marker) {
+            marker.setMap(null);
+            marker = null;
+        }
+        debugger
+        //经度
+        var lng = e.lnglat.lng;
+        vm.lng = lng;
+        //纬度
+        var lat = e.lnglat.lat;
+        vm.lat = lat;
+    });
+</script>
+</body>
+</html>

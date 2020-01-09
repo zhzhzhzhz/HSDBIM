@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BIM描述</title>
+	<#include "/header.html">
+    <!--<script src="//unpkg.com/wangeditor/release/wangEditor.min.js"></script>-->
+    <script src="${request.contextPath}/statics/js/wangEditor.js"></script>
+    <link rel="stylesheet" href="${request.contextPath}/statics/css/vantIndex.css"/>
+    <script src="${request.contextPath}/statics/js/jsdelivr.vant@2.2vant.min.js"></script>
+    <style>
+        .col-sm-2 {
+            width: 86px;
+        }
+        #jqGridPager1_left{
+            width: 0px;
+        }
+        #gbox_jqGrid1 .ui-jqgrid-bdiv{
+            height: 460px!important;
+        }
+        #jqGridPager1_right{
+            width: 153px;
+        }
+        #jqGridPager1_right .ui-paging-info{
+            padding-right: 50px;
+        }
+    </style>
+</head>
+<body>
+<div id="rrapp" v-cloak>
+    <div v-show="showList">
+        <div class="grid-btn">
+            <div class="form-group col-sm-2" style="padding-right: 270px">
+                <input type="text" class="form-control" v-model="q.name" @keyup.enter="query" placeholder="房间名" style="width: 260px" >
+            </div>
+            <a class="btn btn-default" @click="query">查询</a>
+			<#if shiro.hasPermission("sys:dict:save")>
+            <a class="btn btn-primary" @click="add"><i class="fa fa-plus"></i>&nbsp;新增</a>
+			</#if>
+			<#if shiro.hasPermission("sys:dict:update")>
+            <a class="btn btn-primary" @click="update"><i class="fa fa-pencil-square-o"></i>&nbsp;修改</a>
+			</#if>
+			<#if shiro.hasPermission("sys:dict:delete")>
+            <a class="btn btn-primary" @click="del"><i class="fa fa-trash-o"></i>&nbsp;删除</a>
+			</#if>
+        </div>
+        <table id="jqGrid"></table>
+        <div id="jqGridPager"></div>
+    </div>
+
+    <div v-show="showMessage" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <div style="height: 100%;width: 62%;float: left" >
+            <form class="form-horizontal" style="width: 100%">
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;节点ID</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="节点ID" v-model="hsdBim.bid" style="width: 260px"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">房间名</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="房间名" v-model="hsdBim.name" style="width: 260px"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;所属楼</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="所属楼" v-model="hsdBim.bname" style="width: 260px"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">楼层</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="楼层" v-model="hsdBim.floor" style="width: 260px"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">房间号</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="房间号" v-model="hsdBim.title" style="width: 260px"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"><span style="color: red;font-size: 15px">*</span>&nbsp;&nbsp;类型</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="类型(楼,楼层,房间)" v-model="hsdBim.type" style="width: 260px"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">BIM描述</div>
+                    <div id="editor" class="col-sm-10" style="width:91%;margin-left: 83px;" >
+                        <p>{{hsdBim.description}}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <input type="button" class="btn btn-primary" @click="saveOrUpdate" value="确定"/>
+                    &nbsp;&nbsp;<input type="button" class="btn btn-warning" @click="reload" value="返回"/>
+                </div>
+            </form>
+        </div>
+
+        <div style="height: 100%;width: 38%;float: left">
+            <table id="jqGrid1" ></table>
+            <div id="jqGridPager1"></div>
+        </div>
+    </div>
+    <div v-show="show" class="panel panel-default">
+        <div class="panel-heading">{{title}}</div>
+        <div style="height: 100%;width: 62%;float: left" >
+            <form class="form-horizontal" style="width: 100%">
+
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">节点</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"   v-model="hsdBim.bid" style="width: 260px" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">房间名</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"   v-model="hsdBim.name" style="width: 260px" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">所属楼</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  v-model="hsdBim.bname" style="width: 260px" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">楼层</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"   v-model="hsdBim.floor" style="width: 260px" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">房间号</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  v-model="hsdBim.title" style="width: 260px" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">类型</div>
+                    <div class="col-sm-10" style="width: 20%">
+                        <input type="text" class="form-control"  placeholder="类型(楼,楼层,房间)" v-model="hsdBim.type" style="width: 260px" readonly="readonly"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label">BIM描述</div>
+                    <div id="editor1" class="col-sm-10" style="width:91%;margin-left: 83px;" readonly="readonly">
+                        <p>{{hsdBim.description}}</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-2 control-label"></div>
+                    <input type="button" class="btn btn-warning" @click="back" value="返回"/>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        $("#jqGrid1").jqGrid({
+            url: baseURL + 'sys/photoGallery/list',
+            datatype: "json",
+            colModel: [
+                { label: 'ID', name: 'id', index: 'id',width:60},
+                { label: '图片描述', name: 'name', index: 'name',width:130},
+                { label: '图片', name: 'url',   align: "center",width:120, sortable: false, editable: false, formatter: alarmFormatter },
+                { label: '操作',  edittype:"button",formatter: cmgStateFormat  },
+            ],
+
+            viewrecords: true,
+            height: 385,
+            rowNum: 10,
+            rowList : [10,30,50],
+            rownumbers: true,
+            rownumWidth: 45,
+            autowidth:true,
+            /*multiselect: true,*/
+            pager: "#jqGridPager1",
+            jsonReader : {
+                root: "page.list",
+                page: "page.currPage",
+                total: "page.totalPage",
+                records: "page.totalCount"
+            },
+            prmNames : {
+                page:"page",
+                rows:"limit",
+                order: "order"
+            },
+            gridComplete:function(){
+                //隐藏grid底部滚动条
+                $("#jqGrid1").closest(".ui-jqgrid-bdiv").css({ "overflow-x" : "hidden" });
+            }
+        });
+    });
+    function alarmFormatter(cellvalue, options, rowdata) {
+        return ' <img src="http://192.168.50.16:8080' + rowdata.url + '"  style="width:50px;height:50px;" />';
+    };
+    function cmgStateFormat(cellvalue,options, rowdata) {
+        var url=rowdata.url;
+        return "<button class='btn btn-primary ' onclick=\"change('" + url + "')\">" +
+               "<span style='font-size: 12px'>获取图片地址</span>" +
+               "</button>";
+    }
+    function change(data) {
+        var url = "http://192.168.50.16:8080"+data;
+        var oInput = document.createElement("input");
+        oInput.value = url;
+        document.body.appendChild(oInput);
+        oInput.select(); // 选择对象
+        document.execCommand("Copy"); // 执行浏览器复制命令
+        vant.Toast.success("复制成功")
+
+    }
+
+</script>
+<script src="${request.contextPath}/statics/js/modules/sys/hsdbimdescription.js?_${.now?long}"></script>
+</body>
+</html>

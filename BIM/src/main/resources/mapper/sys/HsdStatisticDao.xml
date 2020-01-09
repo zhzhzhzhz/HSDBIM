@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.renren.modules.sys.dao.HsdStatisticDao">
+    <resultMap id="BaseResultMap" type="io.renren.modules.sys.entity.HsdStatistic">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="username" jdbcType="VARCHAR" property="username"/>
+        <result column="user_lng" jdbcType="VARCHAR" property="userLng"/>
+        <result column="user_lat" jdbcType="VARCHAR" property="userLat"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id,username,user_lng,user_lat,create_time
+    </sql>
+
+    <select id="queryPeopleArea" resultMap="BaseResultMap">
+         select user_lng,user_lat
+         from hsd_statistic
+         <where>
+             <if test="start != null and start != '' and end != null and end != ''">
+                 create_time between #{start} and #{end}
+             </if>
+         </where>
+    </select>
+</mapper>
